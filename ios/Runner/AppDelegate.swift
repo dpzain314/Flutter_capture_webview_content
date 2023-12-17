@@ -4,6 +4,7 @@ import WebKit
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
+    
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -13,17 +14,21 @@ import WebKit
         
         channel.setMethodCallHandler({(call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             if(call.method == "recap"){
-                self.openRecapScreen(from: controller)
+                if let args = call.arguments as? String{
+                    self.openRecapScreen(from: controller,args)
+                }
             }
+            
         })
         
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
     
-    func openRecapScreen(from viewController: UIViewController) {
+    func openRecapScreen(from viewController: UIViewController, _ recapUrl: String) {
         let recapViewController = RecapViewController()
         recapViewController.modalPresentationStyle = .fullScreen
+        recapViewController.receiveParameter(parameter: recapUrl)
         
         if let navigationController = viewController.navigationController {
             navigationController.pushViewController(recapViewController, animated: true)
@@ -32,5 +37,5 @@ import WebKit
         }
         //        viewController.present(recapViewController, animated: true, completion: nil)
     }
-
+    
 }
