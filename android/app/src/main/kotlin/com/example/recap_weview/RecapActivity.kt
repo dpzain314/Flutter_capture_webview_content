@@ -1,5 +1,6 @@
 package com.example.recap_weview
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
@@ -10,6 +11,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.view.View
+import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.Toast
@@ -90,9 +92,23 @@ class RecapActivity : AppCompatActivity() {
                 "            </tr>\n" +
                 "         </tbody>\n" +
                 "      </table>\n" +
+                " <button id=\"callbackButton\" onclick=\"sendCallback()\">Send Callback</button>" +
+                "<script>\n" +
+                "        function sendCallback() {\n" +
+                "            // Check if the native interface is available\n" +
+                "            if (window.webkit && window.webkit.messageHandlers) {\n" +
+                "                // iOS\n" +
+                "                window.webkit.messageHandlers.jsMessageHandler.postMessage(\"Callback from WebView\");\n" +
+                "            } else if (window.Android) {\n" +
+                "                // Android\n" +
+                "                window.Android.captureScreen(\"Callback from WebView\");\n" +
+                "            }\n" +
+                "        }\n" +
+                "    </script>" +
                 "   </body>\n" +
                 "</html>\n"
 
+    @SuppressLint("SetJavaScriptEnabled", "AddJavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recap)
@@ -100,14 +116,23 @@ class RecapActivity : AppCompatActivity() {
         val download = findViewById<Button>(R.id.download)
         val webView = findViewById<WebView>(R.id.wv_recap)
 
-        download.setOnClickListener {
-            val webViewBitmap = captureWebView(webView)
-//            saveImage(webViewBitmap, this@RecapActivity)
-            saveBitmapToGallery(this, webViewBitmap)
-        }
+        download.setOnClickListener {}
 
-        webView.loadUrl("https://www.instagram.com")
-//        webView.loadData(url, "text/html", "UTF-8")
+        webView.settings.javaScriptEnabled = true
+        webView.addJavascriptInterface(JSHandler(this@RecapActivity, webView), "Android")
+
+//        webView.loadUrl("https://www.instagram.com")
+        webView.loadData(url, "text/html", "UTF-8")
+    }
+
+
+}
+
+class JSHandler(val context: Context, val webview: WebView) {
+    @JavascriptInterface
+    fun captureScreen(message: String) {
+        val webViewBitmap = captureWebView(webview)
+        saveBitmapToGallery(context, webViewBitmap)
     }
 
     private fun captureWebView(webView: WebView): Bitmap {
@@ -163,5 +188,4 @@ class RecapActivity : AppCompatActivity() {
             }
         }
     }
-
 }

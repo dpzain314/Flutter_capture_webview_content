@@ -19,9 +19,6 @@ class RecapViewController: UIViewController, WKNavigationDelegate, WKScriptMessa
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Callback Example</title>
     <style>
-//        body {
-//            height: 200vh; /* Add enough content to enable scrolling */
-//        }
         .long-content {
             margin: 20px;
             padding: 20px;
